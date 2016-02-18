@@ -1,6 +1,7 @@
 package mygame;
 
 import com.jme3.app.SimpleApplication;
+import com.jme3.material.Material;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.RenderManager;
 import com.jme3.renderer.ViewPort;
@@ -20,6 +21,7 @@ public class Main extends SimpleApplication {
 
     static Dimension screen;
     WorldSphere worldSphere;
+    Material[] mats;
 
     public static void main(String[] args) {
         Main app = new Main();
@@ -30,6 +32,7 @@ public class Main extends SimpleApplication {
     @Override
     public void simpleInitApp() {
         initCam();
+       initMaterial();
         worldSphere = new WorldSphere(this);
         worldSphere.sphere.addControl(new Main.SphereControl());
         Spatial sky = SkyFactory.createSky(assetManager, "Textures/Stars.dds", false);
@@ -46,6 +49,29 @@ public class Main extends SimpleApplication {
         app.setShowSettings(false);
     }
 
+    
+    private void initMaterial() {
+        mats = new Material[5];
+        mats[0] = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+         mats[0] .setTexture("ColorMap", assetManager.loadTexture("Textures/Earth.jpg"));
+        
+         mats[1]  = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+         mats[1] .setTexture("ColorMap",assetManager.loadTexture("Textures/Arnessk.png"));
+        
+         mats[2]  = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+         mats[2] .setTexture("ColorMap", assetManager.loadTexture("Textures/Klendathu.png"));
+        
+         mats[3]  = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+         mats[3] .setTexture("ColorMap", assetManager.loadTexture("Textures/Reststop.png"));
+        
+         mats[4]  = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+         mats[4] .setTexture("ColorMap", assetManager.loadTexture("Textures/Thunorrad.jpg"));
+    }
+    
+    
+    
+    
+    
     @Override
     public void simpleUpdate(float tpf) {
         //TODO: add update code

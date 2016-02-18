@@ -25,7 +25,7 @@ public class WorldSphere extends Node {
     public Node sphere;
 
     protected WorldSphere(SimpleApplication sa) {
-        initMaterial(sa);
+      
         initGeometry();
 
         sphere = new Node();
@@ -71,20 +71,5 @@ public class WorldSphere extends Node {
         ball5.setLocalTranslation(10f, 5f, 0f);
     }
 
-    private void initMaterial(SimpleApplication sa) {
-        mat1 = new Material(sa.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
-        mat1.setTexture("ColorMap", sa.getAssetManager().loadTexture("Textures/Earth.jpg"));
-        
-        mat2 = new Material(sa.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
-        mat2.setTexture("ColorMap", sa.getAssetManager().loadTexture("Textures/Arnessk.png"));
-        
-        mat3 = new Material(sa.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
-        mat3.setTexture("ColorMap", sa.getAssetManager().loadTexture("Textures/Klendathu.png"));
-        
-        mat4 = new Material(sa.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
-        mat4.setTexture("ColorMap", sa.getAssetManager().loadTexture("Textures/Reststop.png"));
-        
-        mat5 = new Material(sa.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
-        mat5.setTexture("ColorMap", sa.getAssetManager().loadTexture("Textures/Thunorrad.jpg"));
-    }
+    
 }
