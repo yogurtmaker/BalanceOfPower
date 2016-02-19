@@ -15,8 +15,9 @@ import com.jme3.scene.shape.Sphere;
 
 
 public class Planet extends Node{
-    final int unitEnergyTrans = 5;
-    final int totalTimeTrans = 2;
+    final int unitEnergyTrans = 1;//energy transfer per 0.2s
+    final int totalTimeTrans = 1;
+    float totaltime=0;
     
     // free mean no action, operated mean planet being attacked or infusion, death mean no energy
     final int free=0,absorb = 1,infusion = 2,operated=3,death=4;    
@@ -162,15 +163,15 @@ public class Planet extends Node{
             switch (state) {
                 case absorb:
                     n += tpf;
-                    if (n >= 1) {
+                    if (n >= 0.2) {
                        float tempEnergy = unitEnergyTrans;
                         if (planet.energy < unitEnergyTrans) {
                             tempEnergy = planet.energy;
                         }
                         incEnergy(tempEnergy);
                         planet.decEnergy(tempEnergy);
-                        tempTime++;
-                        n--;
+                        tempTime += 0.2;
+                        n-= 0.2;
                         System.out.println("Planet 174:Time " + tempTime + " absorb" + " plant0:" + energy + " plant1:" + planet.energy);                     
                         checkActionEnd(tempTime);
 
@@ -180,15 +181,15 @@ public class Planet extends Node{
 
                 case infusion:
                     n += tpf;
-                    if (n >= 1) {
+                    if (n >= 0.2) {
                       float  tempEnergy = unitEnergyTrans;
                         if (energy < unitEnergyTrans) {
                             tempEnergy = energy;
                         }
                         decEnergy(tempEnergy);
                         planet.incEnergy(tempEnergy);
-                        tempTime++;
-                        n--;
+                        tempTime +=0.2;
+                        n-= 0.2;
                          System.out.println("Planet 192:Time " + tempTime + " infusion" + " plant0:" + energy + " plant1:" + planet.energy);                                         
                         checkActionEnd(tempTime);
                     }
