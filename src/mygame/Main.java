@@ -20,7 +20,6 @@ import java.awt.Toolkit;
 public class Main extends SimpleApplication {
 
     static Dimension screen;
-    WorldSphere worldSphere;
     Material[] mats;
 
     public static void main(String[] args) {
@@ -33,10 +32,10 @@ public class Main extends SimpleApplication {
     public void simpleInitApp() {
         initCam();
        initMaterial();
-        worldSphere = new WorldSphere(this);
-        worldSphere.sphere.addControl(new Main.SphereControl());
         Spatial sky = SkyFactory.createSky(assetManager, "Textures/Stars.dds", false);
         rootNode.attachChild(sky);
+        Game game = new Game();
+        stateManager.attach(game);
     }
 
     private static void initAppScreen(SimpleApplication app) {
@@ -82,18 +81,7 @@ public class Main extends SimpleApplication {
         //TODO: add render code
     }
 
-    class SphereControl extends AbstractControl {
-
-        @Override
-        protected void controlUpdate(float tpf) {
-            spatial.rotate(0, tpf / 4, 0);
-        }
-
-        @Override
-        protected void controlRender(RenderManager rm, ViewPort vp) {
-            //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-        }
-    }
+  
 
     private void initCam() {
         flyCam.setEnabled(true);

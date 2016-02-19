@@ -17,10 +17,12 @@ import com.jme3.scene.shape.Sphere;
 public class Planet extends Node{
     final int unitEnergyTrans = 5;
     final int totalTimeTrans = 5;
+    
+    // free mean no action, operated mean planet being attacked or infusion, death mean no energy
     final int free=0,absorb = 1,infusion = 2,operated=3,death=4;    
     float energy=100,tempTime=0,tempEnergy=0;
      int  state=0;
-//    boolean onAction = false;
+ 
     Main main;
     SimpleApplication sa;
     Material mat;
@@ -28,11 +30,11 @@ public class Planet extends Node{
     Planet planet;
 
     
-    public Planet(Main main, SimpleApplication sa,Material mat){
-    this.main = main;
-    this.sa=sa;
+    public Planet(Material mat){
     this.mat =mat;
     initPlanet();
+    PlanetControl pControl = new PlanetControl();
+    addControl(pControl);
     }
     
     
@@ -112,7 +114,7 @@ public class Planet extends Node{
     }
      
      
-     //donation will both incEnergy
+     //donation don't need to check if any of them death
      public synchronized boolean donation(Planet planet){
         if (state == free && planet.state == free) {
             setState(operated);
@@ -120,7 +122,7 @@ public class Planet extends Node{
             float temp = 0;
             temp = energy * .5f;
 
-            incEnergy(temp);
+            decEnergy(temp);
             planet.incEnergy(temp);
 
             planet.setState(free);
@@ -188,8 +190,7 @@ public class Planet extends Node{
 
         @Override
         protected void controlRender(RenderManager rm, ViewPort vp) {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-        }
+               }
     
     
     
