@@ -16,12 +16,12 @@ import com.jme3.scene.shape.Sphere;
 
 public class Planet extends Node{
     final int unitEnergyTrans = 5;
-    final int totalTimeTrans = 5;
+    final int totalTimeTrans = 2;
     
     // free mean no action, operated mean planet being attacked or infusion, death mean no energy
     final int free=0,absorb = 1,infusion = 2,operated=3,death=4;    
-    float energy=100,tempTime=0,tempEnergy=0;
-     int  state=0;
+    float energy=100,tempTime=0,n=0;
+     int  state=0  ;
  
     Main main;
     SimpleApplication sa;
@@ -61,27 +61,28 @@ public class Planet extends Node{
     public synchronized void setState(int state){
      if(state==free||state ==death){
          tempTime =0;
+         n=0;
      }
     this.state = state;
     }
     
     // final int free=0,absorb = 1,infusion = 2,operated=3; 
-    public synchronized boolean absorb(Planet planet){
+    public  boolean absorb(Planet planet){
         if(state==free && planet.state==free)
-        {state = absorb;
-         this.planet = planet;
+        {state = absorb;      
          planet.setState(operated);
+           this.planet = planet;
          return true;
         }     
         return false;  
     }
     
     //attack will both decEnergy, attacked planet may death
-        public synchronized boolean attack(Planet planet){
+        public  boolean attack(Planet planet){
                if (state == free && planet.state == free) {
             setState(operated);
             planet.setState(operated);
-            float temp = 0;
+            float temp ;
             temp = energy * .5f;
             
             // attacked planet will death when its anergy less than half of attacker's energy
@@ -97,17 +98,19 @@ public class Planet extends Node{
                 planet.setState(free);
             }
             setState(free);
+             System.out.println("Planet 101:"  + " attack" + " plant0:" + energy + " plant1:" + planet.energy);                     
+              
             return true;
         }
         return false;
     } 
     
         
-     public synchronized boolean infusion(Planet planet){
+     public  boolean infusion(Planet planet){
        if(state==free && planet.state==free)
-        {state = infusion;
-         this.planet = planet;
+        {state = infusion;   
          planet.setState(operated);
+        this.planet = planet;
          return true;
         }     
         return false;  
@@ -115,7 +118,7 @@ public class Planet extends Node{
      
      
      //donation don't need to check if any of them death
-     public synchronized boolean donation(Planet planet){
+     public  boolean donation(Planet planet){
         if (state == free && planet.state == free) {
             setState(operated);
             planet.setState(operated);
@@ -127,6 +130,8 @@ public class Planet extends Node{
 
             planet.setState(free);
             setState(free);
+              System.out.println("Planet 134:"  + " donation" + " plant0:" + energy + " plant1:" + planet.energy);                     
+          
             return true;
         }
         return false;
@@ -156,34 +161,45 @@ public class Planet extends Node{
         protected void controlUpdate(float tpf) {
             switch (state) {
                 case absorb:
-                    tempTime += tpf;
-                    tempEnergy = unitEnergyTrans;
-                    if (planet.energy < unitEnergyTrans) {
-                        tempEnergy = planet.energy;
+                    n += tpf;
+                    if (n >= 1) {
+                       float tempEnergy = unitEnergyTrans;
+                        if (planet.energy < unitEnergyTrans) {
+                            tempEnergy = planet.energy;
+                        }
+                        incEnergy(tempEnergy);
+                        planet.decEnergy(tempEnergy);
+                        tempTime++;
+                        n--;
+                        System.out.println("Planet 174:Time " + tempTime + " absorb" + " plant0:" + energy + " plant1:" + planet.energy);                     
+                        checkActionEnd(tempTime);
+
                     }
-                    incEnergy(tempEnergy);
-                    planet.decEnergy(tempEnergy);
-                    checkActionEnd(tempTime);
                     break;
 
 
                 case infusion:
-                    tempTime += tpf;
-                    tempEnergy = unitEnergyTrans;
-                    if (planet.energy < unitEnergyTrans) {
-                        tempEnergy = planet.energy;
+                    n += tpf;
+                    if (n >= 1) {
+                      float  tempEnergy = unitEnergyTrans;
+                        if (energy < unitEnergyTrans) {
+                            tempEnergy = energy;
+                        }
+                        decEnergy(tempEnergy);
+                        planet.incEnergy(tempEnergy);
+                        tempTime++;
+                        n--;
+                         System.out.println("Planet 192:Time " + tempTime + " infusion" + " plant0:" + energy + " plant1:" + planet.energy);                                         
+                        checkActionEnd(tempTime);
                     }
-                    decEnergy(tempEnergy);
-                    planet.incEnergy(tempEnergy);
-                    checkActionEnd(tempTime);
                     break;
-                    
-                    
+
+
                 default:
                     break;
 
             }
-        
+
         
         
         }
