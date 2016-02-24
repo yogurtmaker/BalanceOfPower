@@ -4,10 +4,11 @@ import com.jme3.app.DebugKeysAppState;
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.StatsAppState;
 import com.jme3.app.state.AppStateManager;
-import com.jme3.input.InputManager;
 import com.jme3.input.KeyInput;
+import com.jme3.input.MouseInput;
 import com.jme3.input.controls.ActionListener;
 import com.jme3.input.controls.KeyTrigger;
+import com.jme3.input.controls.MouseButtonTrigger;
 import com.jme3.light.AmbientLight;
 import com.jme3.light.DirectionalLight;
 import com.jme3.material.Material;
@@ -152,8 +153,8 @@ public class GameClient extends SimpleApplication implements ClientNetworkListen
         fda = msg.field.getLast();
         planets = new Planet[5];
         for (FieldData fd : msg.field) {
-            planets[i] = new Planet(mats[i]);
-              planets[i].geom.setLocalTranslation(fd.x,fd.y,fd.z);
+            planets[i] = new Planet(mats[i], this);
+            planets[i].geom.setLocalTranslation(fd.x, fd.y, fd.z);
             getRootNode().attachChild(planets[i]);
             i++;
             fda = fd;
@@ -171,7 +172,7 @@ public class GameClient extends SimpleApplication implements ClientNetworkListen
          //rootNode.attachChild(planets[i]);
          System.out.println("print: " + i);
          }
-         */
+         */        
         inputManager.addMapping("absorb", new KeyTrigger(KeyInput.KEY_I));
         inputManager.addMapping("attack", new KeyTrigger(KeyInput.KEY_K));
         inputManager.addMapping("infusion", new KeyTrigger(KeyInput.KEY_J));
@@ -221,9 +222,9 @@ public class GameClient extends SimpleApplication implements ClientNetworkListen
             if (this.ID == -1) {
                 initGame(ncm);
             } else {
-                planets[i] = new Planet(mats[i]);
+                planets[i] = new Planet(mats[i], this);
                 FieldData tempfd = ncm.field.getLast();
-                planets[i].geom.setLocalTranslation(tempfd.x,tempfd.y,tempfd.z);
+                planets[i].geom.setLocalTranslation(tempfd.x, tempfd.y, tempfd.z);
                 getRootNode().attachChild(planets[i]);
                 i++;
                 //inPlayfield.addSphere(ncm.field.getLast());
