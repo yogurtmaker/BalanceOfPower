@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package mygame;
+package client;
 
 import com.jme3.app.SimpleApplication;
 import com.jme3.material.Material;
@@ -12,6 +12,7 @@ import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.control.AbstractControl;
 import com.jme3.scene.shape.Sphere;
+import sun.tools.jar.Main;
 
 public class Planet extends Node{
     final int unitEnergyTrans = 1;//energy transfer per 0.2s
