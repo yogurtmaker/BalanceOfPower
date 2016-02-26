@@ -10,8 +10,10 @@ import com.jme3.network.Server;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import messages.Detach;
 import messages.Registration;
 import messages.StringData;
+import messages.VecPos;
 
 public class ServerNetworkHandler implements MessageListener, ConnectionListener {
 
@@ -35,9 +37,16 @@ public class ServerNetworkHandler implements MessageListener, ConnectionListener
 
     // -------------------------------------------------------------------------
     public void messageReceived(Object source, Message msg) {
-        System.out.println("Received: " + (StringData)msg);
-        gameServer.messageReceived(msg);
-        broadcast(msg);
+        //System.out.println("Received: " + (StringData)msg);
+        //gameServer.messageReceived(msg);
+        //broadcast(msg);
+        if (msg instanceof VecPos) {
+            System.out.println("Received message from vector");
+            broadcast(msg);
+        }
+        if (msg instanceof Detach) {
+            broadcast(msg);
+        }
     }
 
     // -------------------------------------------------------------------------

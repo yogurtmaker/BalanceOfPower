@@ -15,6 +15,7 @@ public class GameServer implements ServerNetworkListener {
 
     ServerNetworkHandler networkHandler;
     PlayField playfield;
+    int i = 0;
 
     // -------------------------------------------------------------------------
     public static void main(String[] args) {
@@ -47,11 +48,14 @@ public class GameServer implements ServerNetworkListener {
     public Message newConnectionReceived(int connectionID) throws Exception {
         // put player on random playfield
         boolean ok = playfield.addElement(connectionID);
+        if (i >= 5)
+            ok = false;
         if (!ok) {
             throw new Exception("Max number of players exceeded.");
         }
         // send entire playfield to new client
         NewClientMessage iniCM = new NewClientMessage(connectionID, playfield.data);
+        i++;
         return (iniCM);
     }
 }

@@ -4,6 +4,7 @@
  */
 package messages;
 
+import com.jme3.math.Vector3f;
 import com.jme3.network.AbstractMessage;
 import com.jme3.network.serializing.Serializable;
 import server.FieldData;
@@ -13,19 +14,19 @@ import server.FieldData;
  * @author alien
  */
 @Serializable
-public class StringData extends AbstractMessage {
+public class VecPos extends AbstractMessage {
 
-    public String key;
-    public FieldData field;
+    public Vector3f vecSou;
+    public Vector3f vecTar;
 
     // -------------------------------------------------------------------------
-    public StringData() {
+    public VecPos() {
     }
 
     // -------------------------------------------------------------------------
-    public StringData(String key, FieldData playfield) {
+    public VecPos(Vector3f vecSou, Vector3f vecTar) {
         super();
-        this.key = key;
-        this.field = playfield;
+        this.vecSou = vecSou;
+        this.vecTar = vecTar;
     }
 }

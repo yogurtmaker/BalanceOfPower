@@ -6,26 +6,23 @@ package messages;
 
 import com.jme3.network.AbstractMessage;
 import com.jme3.network.serializing.Serializable;
-import server.FieldData;
 
 /**
  *
  * @author alien
  */
 @Serializable
-public class StringData extends AbstractMessage {
+public class Detach extends AbstractMessage {
 
-    public String key;
-    public FieldData field;
+    public String signal;
 
     // -------------------------------------------------------------------------
-    public StringData() {
+    public Detach() {
     }
 
     // -------------------------------------------------------------------------
-    public StringData(String key, FieldData playfield) {
+    public Detach(String signal) {
         super();
-        this.key = key;
-        this.field = playfield;
+        this.signal = signal;
     }
 }

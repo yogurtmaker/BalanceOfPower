@@ -4,6 +4,7 @@ import com.jme3.app.DebugKeysAppState;
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.StatsAppState;
 import com.jme3.app.state.AppStateManager;
+import com.jme3.collision.CollisionResults;
 import com.jme3.input.KeyInput;
 import com.jme3.input.MouseInput;
 import com.jme3.input.controls.ActionListener;
@@ -13,18 +14,24 @@ import com.jme3.light.AmbientLight;
 import com.jme3.light.DirectionalLight;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
+import com.jme3.math.Ray;
+import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 import com.jme3.network.Message;
 import com.jme3.post.FilterPostProcessor;
 import com.jme3.post.filters.BloomFilter;
+import com.jme3.scene.Geometry;
 import com.jme3.scene.Spatial;
+import com.jme3.scene.debug.Arrow;
 import com.jme3.shadow.DirectionalLightShadowRenderer;
 import com.jme3.system.AppSettings;
 import com.jme3.util.SkyFactory;
 import java.awt.Dimension;
 import java.awt.Toolkit;
+import messages.Detach;
 import messages.NewClientMessage;
 import messages.StringData;
+import messages.VecPos;
 import server.FieldData;
 
 public class GameClient extends SimpleApplication implements ClientNetworkListener, ActionListener {
@@ -36,11 +43,13 @@ public class GameClient extends SimpleApplication implements ClientNetworkListen
     private ClientPlayfield inPlayfield;
     private ClientPlayfield playfield1;
     FieldData fda;
-    Material mats[];
+    Material mats[], arrmat;
     Planet[] planets;
     GameClient main;
     AppStateManager asm;
     int i = 0;
+    Vector3f hitVector;
+    Geometry arrow, arrow1;
 
     // -------------------------------------------------------------------------
     public static void main(String[] args) {
@@ -74,7 +83,7 @@ public class GameClient extends SimpleApplication implements ClientNetworkListen
         initLightandShadow();
         initPostProcessing();
         initKeys();
-
+        
     }
 
     // -------------------------------------------------------------------------
@@ -172,18 +181,20 @@ public class GameClient extends SimpleApplication implements ClientNetworkListen
          //rootNode.attachChild(planets[i]);
          System.out.println("print: " + i);
          }
-         */        
+         */
         inputManager.addMapping("absorb", new KeyTrigger(KeyInput.KEY_I));
         inputManager.addMapping("attack", new KeyTrigger(KeyInput.KEY_K));
         inputManager.addMapping("infusion", new KeyTrigger(KeyInput.KEY_J));
         inputManager.addMapping("donation", new KeyTrigger(KeyInput.KEY_L));
         inputManager.addListener(this, "absorb", "attack", "infusion", "donation");
-
+        inputManager.addMapping("Click", new MouseButtonTrigger(MouseInput.BUTTON_LEFT));
+        inputManager.addListener(this, "Click");
+        
     }
 
     // key action
     public void onAction(String name, boolean isPressed, float tpf) {
-
+        
         if (name.equals("absorb")) {
             planets[0].absorb(planets[1]);
         } else if (name.equals("attack") && isPressed) {
@@ -193,23 +204,81 @@ public class GameClient extends SimpleApplication implements ClientNetworkListen
         } else if (name.equals("donation") && isPressed) {
             planets[0].donation(planets[1]);
         }
-
+        if ("Click".equals(name) && isPressed) {
+            CollisionResults results = new CollisionResults();
+            Vector2f click2d = inputManager.getCursorPosition();
+            Vector3f click3d = cam.getWorldCoordinates(new Vector2f(click2d.x, click2d.y), 0f).clone();
+            Vector3f dir = cam.getWorldCoordinates(new Vector2f(click2d.x, click2d.y), 1f).subtractLocal(click3d).normalizeLocal();
+            Ray ray = new Ray(click3d, dir);
+            for (int j = 0; j < i; j++) {
+                if (ID != j) {
+                    planets[j].collideWith(ray, results);
+                    float minDist = Float.MAX_VALUE;
+                    if (hitVector != null) {
+                        hitVector = null;
+                        mats[ID].setColor("GlowColor", ColorRGBA.Black);
+                        rootNode.detachChild(arrow);
+                        Detach deMsg = new Detach("detach");
+                        networkHandler.send(deMsg);
+                    }
+                    if (results.size() > 0) {
+                        float[] xyz = planets[ID].getVec();
+                        String target = results.getCollision(0).getGeometry().getName();
+                        if (target.equals("Ball")) {
+                            Vector3f pt = results.getClosestCollision().getGeometry().getWorldTranslation();
+                            float dist = results.getCollision(0).getDistance();
+                            if (dist < minDist) {
+                                //float[] xyz = getVec();
+                                Vector3f gp = new Vector3f(xyz[0], xyz[1], xyz[2]);
+                                Vector3f gp1 = new Vector3f(pt.x, pt.y, pt.z);
+                                gp1.subtractLocal(gp);
+                                //gp.normalizeLocal();
+                                hitVector = pt;
+                                mats[ID].setColor("GlowColor", ColorRGBA.Pink);
+                                Arrow line = new Arrow(gp1);
+                                line.setLineWidth(4);
+                                arrow = new Geometry("Arrow", line);
+                                arrmat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+                                arrmat.setColor("Color", ColorRGBA.Gray);
+                                arrow.setMaterial(arrmat);
+                                arrow.setLocalTranslation(planets[ID].geom.getWorldTranslation());
+                                VecPos vecMsg = new VecPos(planets[ID].geom.getWorldTranslation(), gp1);
+                                networkHandler.send(vecMsg);
+                                /*Vector3f unitX = new Vector3f(xyz[0], xyz[1], xyz[2]); 
+                                 unitX.normalizeLocal();
+                                 Vector3f rotAxis = unitX.cross(gp);
+                                 float dis = planets[ID].geom.getWorldTranslation().subtract(gp1).length();
+                                 float sinAlpha = rotAxis.length(); 
+                                 float cosineAlpha = unitX.dot(gp);
+                                 float alpha = FastMath.atan2(sinAlpha, cosineAlpha);
+                                 Quaternion q = new Quaternion();
+                                 q.fromAngleAxis(alpha, rotAxis);
+                                 arrow.setLocalRotation(q);
+                                 arrow.setLocalScale(dis);   */
+                                getRootNode().attachChild(arrow);
+                            }
+                        }
+                    }
+                }
+            }
+            
+        }
     }
-
+    
     private void initMaterial() {
         mats = new Material[6];
         mats[0] = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
         mats[0].setTexture("ColorMap", assetManager.loadTexture("Textures/Earth.jpg"));
-
+        
         mats[1] = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
         mats[1].setTexture("ColorMap", assetManager.loadTexture("Textures/Arnessk.png"));
-
+        
         mats[2] = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
         mats[2].setTexture("ColorMap", assetManager.loadTexture("Textures/Klendathu.png"));
-
+        
         mats[3] = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
         mats[3].setTexture("ColorMap", assetManager.loadTexture("Textures/Reststop.png"));
-
+        
         mats[4] = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
         mats[4].setTexture("ColorMap", assetManager.loadTexture("Textures/Thunorrad.jpg"));
     }
@@ -234,7 +303,23 @@ public class GameClient extends SimpleApplication implements ClientNetworkListen
             StringData sd = (StringData) msg;
             System.out.println("Client received " + sd.key);
             playfield1.addSphere(sd.field);
-            new SingleBurstParticleEmitter(this, playfield1.node, Vector3f.ZERO);
+            //new SingleBurstParticleEmitter(this, playfield1.node, Vector3f.ZERO);
+        }
+        if (msg instanceof VecPos) {
+            VecPos vecMsg = (VecPos) msg;
+            Arrow line = new Arrow(vecMsg.vecTar);
+            line.setLineWidth(4);
+            System.out.println("123123");
+            arrow1 = new Geometry("Arrow", line);
+            arrmat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+            arrmat.setColor("Color", ColorRGBA.Gray);
+            arrow1.setMaterial(arrmat);
+            arrow1.setLocalTranslation(vecMsg.vecSou);
+            getRootNode().attachChild(arrow1);
+            //new SingleBurstParticleEmitter(this, playfield1.node, Vector3f.ZERO);
+        }
+        if (msg instanceof Detach) {
+            getRootNode().detachChild(arrow1);
         }
     }
 }

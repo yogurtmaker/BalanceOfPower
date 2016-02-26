@@ -11,6 +11,8 @@ import com.jme3.input.controls.ActionListener;
 import com.jme3.input.controls.MouseButtonTrigger;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
+import com.jme3.math.FastMath;
+import com.jme3.math.Quaternion;
 import com.jme3.math.Ray;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
@@ -44,8 +46,6 @@ public class Planet extends Node {
         initPlanet();
         PlanetControl pControl = new PlanetControl();
         addControl(pControl);
-        sa.getInputManager().addMapping("Click", new MouseButtonTrigger(MouseInput.BUTTON_LEFT));
-        sa.getInputManager().addListener(actListener, "Click");
     }
 
     private void initPlanet() {
@@ -53,7 +53,6 @@ public class Planet extends Node {
         largeSphere.setTextureMode(Sphere.TextureMode.Projected);
         geom = new Geometry("Ball", largeSphere);
         geom.setMaterial(mat);
-        geom.setLocalTranslation(-10f, 5f, 0f);
         attachChild(geom);
     }
 
@@ -149,42 +148,14 @@ public class Planet extends Node {
     }
     private ActionListener actListener = new ActionListener() {
         public void onAction(String name, boolean isPressed, float tpf) {
-            if ("Click".equals(name) && isPressed) {
-                CollisionResults results = new CollisionResults();
-                Vector2f click2d = sa.getInputManager().getCursorPosition();
-                Vector3f click3d = sa.getCamera().getWorldCoordinates(new Vector2f(click2d.x, click2d.y), 0f).clone();
-                Vector3f dir = sa.getCamera().getWorldCoordinates(new Vector2f(click2d.x, click2d.y), 1f).subtractLocal(click3d).normalizeLocal();
-                Ray ray = new Ray(click3d, dir);
-                collideWith(ray, results);
-                float minDist = Float.MAX_VALUE;
-                if (hitVector != null) {
-                    hitVector = null;
-                    mat.setColor("GlowColor", ColorRGBA.Black);
-                    detachChild(arrow);
-                }
-                if (results.size() > 0) {
-                    String target = results.getCollision(0).getGeometry().getName();
-                    if (target.equals("Ball")) {
-                        Vector3f pt = results.getClosestCollision().getGeometry().getWorldTranslation();
-                        float dist = results.getCollision(0).getDistance();
-                        if (dist < minDist) {
-                            hitVector = pt;
-                            mat.setColor("GlowColor", ColorRGBA.Pink);
-                            Arrow line = new Arrow(hitVector);
-                            line.setLineWidth(4);
-                            arrow = new Geometry("Arrow", line);
-                            arrmat = new Material(sa.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
-                            arrmat.setColor("Color", ColorRGBA.Gray);
-                            arrow.setMaterial(arrmat);
-                            arrow.setLocalTranslation(new Vector3f(geom.getWorldTranslation()));
-                            attachChild(arrow);
-                        }
-                    }
-                }
-                System.out.println(hitVector);
-            }
         }
+        //System.out.println(hitVector);
     };
+
+    public float[] getVec() {
+        float[] xyz = {geom.getWorldTranslation().x, geom.getWorldTranslation().y, geom.getWorldTranslation().z};
+        return xyz;
+    }
 
     public class PlanetControl extends AbstractControl {
 

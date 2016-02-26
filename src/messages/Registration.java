@@ -17,5 +17,7 @@ public class Registration {
         Serializer.registerClass(StringData.class);
         Serializer.registerClass(NewClientMessage.class);
         Serializer.registerClass(FieldData.class);
+        Serializer.registerClass(VecPos.class);
+        Serializer.registerClass(Detach.class);
     }
 }
