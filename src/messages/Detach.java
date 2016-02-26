@@ -15,14 +15,16 @@ import com.jme3.network.serializing.Serializable;
 public class Detach extends AbstractMessage {
 
     public String signal;
+    public int ID;
 
     // -------------------------------------------------------------------------
     public Detach() {
     }
 
     // -------------------------------------------------------------------------
-    public Detach(String signal) {
+    public Detach(String signal, int ID) {
         super();
+        this.ID = ID;
         this.signal = signal;
     }
 }

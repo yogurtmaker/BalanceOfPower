@@ -83,7 +83,7 @@ public class GameClient extends SimpleApplication implements ClientNetworkListen
         initLightandShadow();
         initPostProcessing();
         initKeys();
-        
+
     }
 
     // -------------------------------------------------------------------------
@@ -189,12 +189,12 @@ public class GameClient extends SimpleApplication implements ClientNetworkListen
         inputManager.addListener(this, "absorb", "attack", "infusion", "donation");
         inputManager.addMapping("Click", new MouseButtonTrigger(MouseInput.BUTTON_LEFT));
         inputManager.addListener(this, "Click");
-        
+
     }
 
     // key action
     public void onAction(String name, boolean isPressed, float tpf) {
-        
+
         if (name.equals("absorb")) {
             planets[0].absorb(planets[1]);
         } else if (name.equals("attack") && isPressed) {
@@ -217,8 +217,8 @@ public class GameClient extends SimpleApplication implements ClientNetworkListen
                     if (hitVector != null) {
                         hitVector = null;
                         mats[ID].setColor("GlowColor", ColorRGBA.Black);
-                        rootNode.detachChild(arrow);
-                        Detach deMsg = new Detach("detach");
+                        //rootNode.detachChild(arrow);
+                        Detach deMsg = new Detach("detach", ID);
                         networkHandler.send(deMsg);
                     }
                     if (results.size() > 0) {
@@ -235,50 +235,39 @@ public class GameClient extends SimpleApplication implements ClientNetworkListen
                                 //gp.normalizeLocal();
                                 hitVector = pt;
                                 mats[ID].setColor("GlowColor", ColorRGBA.Pink);
-                                Arrow line = new Arrow(gp1);
+                                /*Arrow line = new Arrow(gp1);
                                 line.setLineWidth(4);
                                 arrow = new Geometry("Arrow", line);
                                 arrmat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
                                 arrmat.setColor("Color", ColorRGBA.Gray);
-                                arrow.setMaterial(arrmat);
-                                arrow.setLocalTranslation(planets[ID].geom.getWorldTranslation());
-                                VecPos vecMsg = new VecPos(planets[ID].geom.getWorldTranslation(), gp1);
+                                arrow.setMaterial(arrmat);*/
+                                //arrow.setLocalTranslation(planets[ID].geom.getWorldTranslation());
+                                VecPos vecMsg = new VecPos(planets[ID].geom.getWorldTranslation(), gp1, ID);
                                 networkHandler.send(vecMsg);
-                                /*Vector3f unitX = new Vector3f(xyz[0], xyz[1], xyz[2]); 
-                                 unitX.normalizeLocal();
-                                 Vector3f rotAxis = unitX.cross(gp);
-                                 float dis = planets[ID].geom.getWorldTranslation().subtract(gp1).length();
-                                 float sinAlpha = rotAxis.length(); 
-                                 float cosineAlpha = unitX.dot(gp);
-                                 float alpha = FastMath.atan2(sinAlpha, cosineAlpha);
-                                 Quaternion q = new Quaternion();
-                                 q.fromAngleAxis(alpha, rotAxis);
-                                 arrow.setLocalRotation(q);
-                                 arrow.setLocalScale(dis);   */
-                                getRootNode().attachChild(arrow);
+                                //getRootNode().attachChild(arrow);
                             }
                         }
                     }
                 }
             }
-            
+
         }
     }
-    
+
     private void initMaterial() {
         mats = new Material[6];
         mats[0] = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
         mats[0].setTexture("ColorMap", assetManager.loadTexture("Textures/Earth.jpg"));
-        
+
         mats[1] = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
         mats[1].setTexture("ColorMap", assetManager.loadTexture("Textures/Arnessk.png"));
-        
+
         mats[2] = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
         mats[2].setTexture("ColorMap", assetManager.loadTexture("Textures/Klendathu.png"));
-        
+
         mats[3] = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
         mats[3].setTexture("ColorMap", assetManager.loadTexture("Textures/Reststop.png"));
-        
+
         mats[4] = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
         mats[4].setTexture("ColorMap", assetManager.loadTexture("Textures/Thunorrad.jpg"));
     }
@@ -293,7 +282,7 @@ public class GameClient extends SimpleApplication implements ClientNetworkListen
             } else {
                 planets[i] = new Planet(mats[i], this);
                 FieldData tempfd = ncm.field.getLast();
-                planets[i].geom.setLocalTranslation(tempfd.x, tempfd.y, tempfd.z);
+                planets[i].geom.setLocalTranslation(tempfd.x, tempfd.y, tempfd.z);            
                 getRootNode().attachChild(planets[i]);
                 i++;
                 //inPlayfield.addSphere(ncm.field.getLast());
@@ -314,12 +303,16 @@ public class GameClient extends SimpleApplication implements ClientNetworkListen
             arrmat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
             arrmat.setColor("Color", ColorRGBA.Gray);
             arrow1.setMaterial(arrmat);
-            arrow1.setLocalTranslation(vecMsg.vecSou);
-            getRootNode().attachChild(arrow1);
+            arrow1.setLocalTranslation(vecMsg.vecSou);         
+            planets[vecMsg.ID].attachChild(arrow1);
+         
             //new SingleBurstParticleEmitter(this, playfield1.node, Vector3f.ZERO);
         }
         if (msg instanceof Detach) {
-            getRootNode().detachChild(arrow1);
+            Detach deMsg = (Detach) msg;
+           arrow1.removeFromParent();
+            //arrow1.setLocalScale(0);
+            System.out.println("123");
         }
     }
 }

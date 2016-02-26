@@ -7,7 +7,6 @@ package messages;
 import com.jme3.math.Vector3f;
 import com.jme3.network.AbstractMessage;
 import com.jme3.network.serializing.Serializable;
-import server.FieldData;
 
 /**
  *
@@ -18,15 +17,17 @@ public class VecPos extends AbstractMessage {
 
     public Vector3f vecSou;
     public Vector3f vecTar;
+    public int ID;
 
     // -------------------------------------------------------------------------
     public VecPos() {
     }
 
     // -------------------------------------------------------------------------
-    public VecPos(Vector3f vecSou, Vector3f vecTar) {
+    public VecPos(Vector3f vecSou, Vector3f vecTar, int ID) {
         super();
         this.vecSou = vecSou;
         this.vecTar = vecTar;
+        this.ID = ID;
     }
 }
