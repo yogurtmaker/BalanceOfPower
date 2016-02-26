@@ -8,6 +8,7 @@ import com.jme3.network.MessageListener;
 import com.jme3.network.Network;
 import com.jme3.network.Server;
 import java.io.IOException;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import messages.Detach;
@@ -18,6 +19,7 @@ import messages.VecPos;
 public class ServerNetworkHandler implements MessageListener, ConnectionListener {
 
     public static int SERVERPORT = 6143;
+    static ReentrantLock lock = new ReentrantLock();
     Server server;
     ServerNetworkListener gameServer;
 
@@ -40,17 +42,21 @@ public class ServerNetworkHandler implements MessageListener, ConnectionListener
         //System.out.println("Received: " + (StringData)msg);
         //gameServer.messageReceived(msg);
         //broadcast(msg);
-        if (msg instanceof VecPos) {
+        lock.lock();
+        /*if (msg instanceof VecPos) {
             System.out.println("Received message from vector");
             broadcast(msg);
         }
         if (msg instanceof Detach) {
             broadcast(msg);
-        }
+        }*/
+        broadcast(msg);
+        lock.unlock();
     }
 
     // -------------------------------------------------------------------------
     public void connectionAdded(Server server, HostedConnection conn) {
+        lock.lock();
         int connID = conn.getId();
         System.out.println("Client " + connID + " connected");
         Message m;
@@ -66,6 +72,7 @@ public class ServerNetworkHandler implements MessageListener, ConnectionListener
             // Connection not accepted.
             System.out.println("Connection not accepted. Kicking out client. TODO!!!" + connID);
         }
+        lock.unlock();
     }
 
     // -------------------------------------------------------------------------
