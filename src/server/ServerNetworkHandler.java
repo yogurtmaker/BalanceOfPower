@@ -11,10 +11,8 @@ import java.io.IOException;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import messages.Detach;
-import messages.Registration;
-import messages.StringData;
-import messages.VecPos;
+import messages.*;
+
 
 public class ServerNetworkHandler implements MessageListener, ConnectionListener {
 
@@ -56,7 +54,6 @@ public class ServerNetworkHandler implements MessageListener, ConnectionListener
 
     // -------------------------------------------------------------------------
     public void connectionAdded(Server server, HostedConnection conn) {
-        lock.lock();
         int connID = conn.getId();
         System.out.println("Client " + connID + " connected");
         Message m;
@@ -72,7 +69,6 @@ public class ServerNetworkHandler implements MessageListener, ConnectionListener
             // Connection not accepted.
             System.out.println("Connection not accepted. Kicking out client. TODO!!!" + connID);
         }
-        lock.unlock();
     }
 
     // -------------------------------------------------------------------------

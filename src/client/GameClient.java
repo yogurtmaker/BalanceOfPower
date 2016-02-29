@@ -1,5 +1,6 @@
 package client;
 
+import com.jme3.app.Application;
 import com.jme3.app.DebugKeysAppState;
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.StatsAppState;
@@ -28,10 +29,12 @@ import com.jme3.system.AppSettings;
 import com.jme3.util.SkyFactory;
 import java.awt.Dimension;
 import java.awt.Toolkit;
-import messages.Detach;
-import messages.NewClientMessage;
-import messages.StringData;
-import messages.VecPos;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.locks.ReentrantLock;
+import javax.xml.crypto.Data;
+import messages.*;
 import server.FieldData;
 
 public class GameClient extends SimpleApplication implements ClientNetworkListener, ActionListener {
@@ -50,12 +53,15 @@ public class GameClient extends SimpleApplication implements ClientNetworkListen
     int i = 0;
     Vector3f hitVector;
     Geometry arrow, arrow1;
+      static ReentrantLock lock = new ReentrantLock();
+
 
     // -------------------------------------------------------------------------
     public static void main(String[] args) {
         System.out.println("Starting Client");
         //
         AppSettings aps = getAppSettings();
+   
         //
         GameClient app = new GameClient();
         app.setShowSettings(false);
@@ -218,7 +224,8 @@ public class GameClient extends SimpleApplication implements ClientNetworkListen
                         hitVector = null;
                         mats[ID].setColor("GlowColor", ColorRGBA.Black);
                         //rootNode.detachChild(arrow);
-                        Detach deMsg = new Detach("detach", ID);
+                        //Detach deMsg = new Detach("detach", ID);
+                        ClientUpdateMessage deMsg = new ClientUpdateMessage(ID,j, MessageTypes.detachArrow);
                         networkHandler.send(deMsg);
                     }
                     if (results.size() > 0) {
@@ -228,23 +235,15 @@ public class GameClient extends SimpleApplication implements ClientNetworkListen
                             Vector3f pt = results.getClosestCollision().getGeometry().getWorldTranslation();
                             float dist = results.getCollision(0).getDistance();
                             if (dist < minDist) {
-                                //float[] xyz = getVec();
                                 Vector3f gp = new Vector3f(xyz[0], xyz[1], xyz[2]);
                                 Vector3f gp1 = new Vector3f(pt.x, pt.y, pt.z);
                                 gp1.subtractLocal(gp);
-                                //gp.normalizeLocal();
                                 hitVector = pt;
-                                mats[ID].setColor("GlowColor", ColorRGBA.Pink);
-                                /*Arrow line = new Arrow(gp1);
-                                line.setLineWidth(4);
-                                arrow = new Geometry("Arrow", line);
-                                arrmat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-                                arrmat.setColor("Color", ColorRGBA.Gray);
-                                arrow.setMaterial(arrmat);*/
-                                //arrow.setLocalTranslation(planets[ID].geom.getWorldTranslation());
-                                VecPos vecMsg = new VecPos(planets[ID].geom.getWorldTranslation(), gp1, ID);
-                                networkHandler.send(vecMsg);
-                                //getRootNode().attachChild(arrow);
+                                mats[ID].setColor("GlowColor", ColorRGBA.Pink);                              
+                               // VecPos vecMsg = new VecPos(planets[ID].geom.getWorldTranslation(), gp1, ID);
+                                ClientUpdateMessage atMsg = new ClientUpdateMessage(ID, j, MessageTypes.attachArrow);                     
+                                networkHandler.send(atMsg);
+ 
                             }
                         }
                     }
@@ -273,9 +272,20 @@ public class GameClient extends SimpleApplication implements ClientNetworkListen
     }
     // -------------------------------------------------------------------------
     // message received
-
-    public void messageReceived(Message msg) {
-        if (msg instanceof NewClientMessage) {
+//    public   void messageReceived(Message msg){
+//        
+//    this.enqueue(new Callable(){
+//        public Object call() throws Exception {
+//        
+//         return null;
+//   
+//        }
+//    });
+//    }
+   
+    
+    public   void messageReceived(Message msg){
+            if (msg instanceof NewClientMessage) {
             NewClientMessage ncm = (NewClientMessage) msg;
             if (this.ID == -1) {
                 initGame(ncm);
@@ -284,35 +294,32 @@ public class GameClient extends SimpleApplication implements ClientNetworkListen
                 FieldData tempfd = ncm.field.getLast();
                 planets[i].geom.setLocalTranslation(tempfd.x, tempfd.y, tempfd.z);            
                 getRootNode().attachChild(planets[i]);
+                inPlayfield.addSphere(tempfd);
                 i++;
                 //inPlayfield.addSphere(ncm.field.getLast());
             }
         }
-        if (msg instanceof StringData) {
-            StringData sd = (StringData) msg;
-            System.out.println("Client received " + sd.key);
-            playfield1.addSphere(sd.field);
+      else  if (msg instanceof ClientUpdateMessage) {
+            ClientUpdateMessage message = (ClientUpdateMessage) msg;
+            MessageTypes messageTypes = message.messageTypes; 
+           System.out.println("Sever received: " + message.messageTypes.name()
+                    + " SourceId:"+message.sourceId +" TargetId:"+message.targetId );
+           // playfield1.addSphere(sd.field);
             //new SingleBurstParticleEmitter(this, playfield1.node, Vector3f.ZERO);
-        }
-        if (msg instanceof VecPos) {
-            VecPos vecMsg = (VecPos) msg;
-            Arrow line = new Arrow(vecMsg.vecTar);
+        if (messageTypes.equals(MessageTypes.attachArrow)) {
+            Arrow line = new Arrow( planets[message.targetId].getWorldTranslation());
             line.setLineWidth(4);
-            System.out.println("123123");
             arrow1 = new Geometry("Arrow", line);
             arrmat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
             arrmat.setColor("Color", ColorRGBA.Gray);
             arrow1.setMaterial(arrmat);
-            arrow1.setLocalTranslation(vecMsg.vecSou);         
-            planets[vecMsg.ID].attachChild(arrow1);
-         
-            //new SingleBurstParticleEmitter(this, playfield1.node, Vector3f.ZERO);
+            arrow1.setLocalTranslation(planets[message.sourceId].getWorldTranslation());         
+            planets[message.sourceId].attachChild(arrow1);        
         }
-        if (msg instanceof Detach) {
-            Detach deMsg = (Detach) msg;
-           arrow1.removeFromParent();
-            //arrow1.setLocalScale(0);
-            System.out.println("123");
+       else if (messageTypes.equals(MessageTypes.detachArrow)) {
+            planets[message.sourceId].detachAllChildren();         
         }
+    
+    }
     }
 }

@@ -55,6 +55,10 @@ public class Planet extends Node {
         geom.setMaterial(mat);
         attachChild(geom);
     }
+    
+     public synchronized void setEnergy(double amount) {
+        energy = amount;
+    }
 
     public synchronized double addToEnergy(double amount) {
         energy += amount;

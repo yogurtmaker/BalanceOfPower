@@ -3,6 +3,7 @@ package messages;
 import com.jme3.network.AbstractMessage;
 import com.jme3.network.serializing.Serializable;
 import java.util.LinkedList;
+import java.util.List;
 import server.FieldData;
 
 @Serializable
@@ -10,7 +11,7 @@ public class NewClientMessage extends AbstractMessage {
 
     public int ID;
     public LinkedList<FieldData> field;
-
+            
     // -------------------------------------------------------------------------
     public NewClientMessage() {
     }

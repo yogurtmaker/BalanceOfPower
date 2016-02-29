@@ -5,7 +5,7 @@ package server;
 
 import com.jme3.network.Message;
 import messages.NewClientMessage;
-import messages.StringData;
+import messages.*;
 
 /**
  *
@@ -38,9 +38,10 @@ public class GameServer implements ServerNetworkListener {
     // -------------------------------------------------------------------------
     // Methods required by ServerNetworkHandler
     public void messageReceived(Message msg) {
-        if (msg instanceof StringData) {
-            StringData sd = (StringData) msg;
-            System.out.println("Sever received " + sd.key);
+        if (msg instanceof ClientUpdateMessage) {
+            ClientUpdateMessage sd = (ClientUpdateMessage) msg;
+            System.out.println("Sever received:" + sd.messageTypes.name()
+                    + " SourceId:"+sd.sourceId +" TargetId:"+sd.targetId );
         }
     }
 
