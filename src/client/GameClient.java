@@ -171,6 +171,7 @@ public class GameClient extends SimpleApplication implements ClientNetworkListen
         for (FieldData fd : msg.field) {
             planets[i] = new Planet(mats[i], this,i);
             planets[i].geom.setLocalTranslation(fd.x, fd.y, fd.z);
+            System.out.println("pisition : "+fd.x+" , "+fd.y+" , "+ fd.z);
             getRootNode().attachChild(planets[i]);
             i++;
             fda = fd;
@@ -292,9 +293,7 @@ public class GameClient extends SimpleApplication implements ClientNetworkListen
             MessageTypes messageTypes = message.messageTypes; 
            System.out.println("Client received: " + message.messageTypes.name()
                     + " SourceId:"+message.sourceId +" TargetId:"+message.targetId );
-           // playfield1.addSphere(sd.field);
-            //new SingleBurstParticleEmitter(this, playfield1.node, Vector3f.ZERO);
-        if (messageTypes.equals(MessageTypes.attachArrow)) {
+           if (messageTypes.equals(MessageTypes.attachArrow)) {
              Vector3f tVector = planets[message.targetId].geom.getWorldTranslation();
              Vector3f sVector = planets[message.sourceId].geom.getWorldTranslation();
              Vector3f dirVector = tVector.subtract(sVector);
