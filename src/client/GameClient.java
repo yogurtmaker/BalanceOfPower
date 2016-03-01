@@ -41,6 +41,7 @@ public class GameClient extends SimpleApplication implements ClientNetworkListen
     //
 
     private int ID = -1;
+    private final int planetRad = 2;
     protected ClientNetworkHandler networkHandler;
     private ClientPlayfield playfield;
     private ClientPlayfield inPlayfield;
@@ -168,7 +169,7 @@ public class GameClient extends SimpleApplication implements ClientNetworkListen
         fda = msg.field.getLast();
         planets = new Planet[5];
         for (FieldData fd : msg.field) {
-            planets[i] = new Planet(mats[i], this);
+            planets[i] = new Planet(mats[i], this,i);
             planets[i].geom.setLocalTranslation(fd.x, fd.y, fd.z);
             getRootNode().attachChild(planets[i]);
             i++;
@@ -211,44 +212,31 @@ public class GameClient extends SimpleApplication implements ClientNetworkListen
             planets[0].donation(planets[1]);
         }
         if ("Click".equals(name) && isPressed) {
+            boolean sendMessage = false;
             CollisionResults results = new CollisionResults();
             Vector2f click2d = inputManager.getCursorPosition();
             Vector3f click3d = cam.getWorldCoordinates(new Vector2f(click2d.x, click2d.y), 0f).clone();
             Vector3f dir = cam.getWorldCoordinates(new Vector2f(click2d.x, click2d.y), 1f).subtractLocal(click3d).normalizeLocal();
             Ray ray = new Ray(click3d, dir);
-            for (int j = 0; j < i; j++) {
-                if (ID != j) {
-                    planets[j].collideWith(ray, results);
-                    float minDist = Float.MAX_VALUE;
-                    if (hitVector != null) {
-                        hitVector = null;
-                        mats[ID].setColor("GlowColor", ColorRGBA.Black);
-                        //rootNode.detachChild(arrow);
-                        //Detach deMsg = new Detach("detach", ID);
-                        ClientUpdateMessage deMsg = new ClientUpdateMessage(ID,j, MessageTypes.detachArrow);
-                        networkHandler.send(deMsg);
-                    }
+                    rootNode.collideWith(ray, results);
                     if (results.size() > 0) {
-                        float[] xyz = planets[ID].getVec();
-                        String target = results.getCollision(0).getGeometry().getName();
-                        if (target.equals("Ball")) {
-                            Vector3f pt = results.getClosestCollision().getGeometry().getWorldTranslation();
-                            float dist = results.getCollision(0).getDistance();
-                            if (dist < minDist) {
-                                Vector3f gp = new Vector3f(xyz[0], xyz[1], xyz[2]);
-                                Vector3f gp1 = new Vector3f(pt.x, pt.y, pt.z);
-                                gp1.subtractLocal(gp);
-                                hitVector = pt;
-                                mats[ID].setColor("GlowColor", ColorRGBA.Pink);                              
-                               // VecPos vecMsg = new VecPos(planets[ID].geom.getWorldTranslation(), gp1, ID);
-                                ClientUpdateMessage atMsg = new ClientUpdateMessage(ID, j, MessageTypes.attachArrow);                     
-                                networkHandler.send(atMsg);
- 
+                        String target = results.getClosestCollision().getGeometry().getName();
+                        if (target.startsWith("Ball")) {
+                           int tempID = Integer.valueOf(target.split(" ")[1]);
+                            if (tempID!=ID) {                             
+                                ClientUpdateMessage atMsg = new ClientUpdateMessage(ID, tempID, MessageTypes.attachArrow);
+                                networkHandler.send(atMsg); 
+                                sendMessage = true;
                             }
                         }
                     }
-                }
-            }
+                    if(!sendMessage){
+                        //  mats[ID].setColor("GlowColor", ColorRGBA.Black);
+                        ClientUpdateMessage deMsg = new ClientUpdateMessage(ID, -1, MessageTypes.detachArrow);
+                        networkHandler.send(deMsg);
+                    }
+//                }
+//            }
 
         }
     }
@@ -290,7 +278,7 @@ public class GameClient extends SimpleApplication implements ClientNetworkListen
             if (this.ID == -1) {
                 initGame(ncm);
             } else {
-                planets[i] = new Planet(mats[i], this);
+                planets[i] = new Planet(mats[i], this,ncm.ID);
                 FieldData tempfd = ncm.field.getLast();
                 planets[i].geom.setLocalTranslation(tempfd.x, tempfd.y, tempfd.z);            
                 getRootNode().attachChild(planets[i]);
@@ -302,22 +290,26 @@ public class GameClient extends SimpleApplication implements ClientNetworkListen
       else  if (msg instanceof ClientUpdateMessage) {
             ClientUpdateMessage message = (ClientUpdateMessage) msg;
             MessageTypes messageTypes = message.messageTypes; 
-           System.out.println("Sever received: " + message.messageTypes.name()
+           System.out.println("Client received: " + message.messageTypes.name()
                     + " SourceId:"+message.sourceId +" TargetId:"+message.targetId );
            // playfield1.addSphere(sd.field);
             //new SingleBurstParticleEmitter(this, playfield1.node, Vector3f.ZERO);
         if (messageTypes.equals(MessageTypes.attachArrow)) {
-            Arrow line = new Arrow( planets[message.targetId].getWorldTranslation());
+             Vector3f tVector = planets[message.targetId].geom.getWorldTranslation();
+             Vector3f sVector = planets[message.sourceId].geom.getWorldTranslation();
+             Vector3f dirVector = tVector.subtract(sVector);
+            Arrow line = new Arrow(dirVector.subtract(dirVector.normalize().mult(1.2f)));
             line.setLineWidth(4);
             arrow1 = new Geometry("Arrow", line);
             arrmat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
             arrmat.setColor("Color", ColorRGBA.Gray);
             arrow1.setMaterial(arrmat);
-            arrow1.setLocalTranslation(planets[message.sourceId].getWorldTranslation());         
-            planets[message.sourceId].attachChild(arrow1);        
+            arrow1.setLocalTranslation(sVector);        
+             planets[message.sourceId].arrowNode.detachAllChildren();
+            planets[message.sourceId].arrowNode.attachChild(arrow1);        
         }
        else if (messageTypes.equals(MessageTypes.detachArrow)) {
-            planets[message.sourceId].detachAllChildren();         
+            planets[message.sourceId].arrowNode.detachAllChildren();
         }
     
     }

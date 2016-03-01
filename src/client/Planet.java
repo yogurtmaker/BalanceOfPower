@@ -18,6 +18,7 @@ import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.RenderManager;
 import com.jme3.renderer.ViewPort;
+import com.jme3.scene.AssetLinkNode;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.control.AbstractControl;
@@ -39,8 +40,11 @@ public class Planet extends Node {
     Planet planet;
     Node trackNode;
     Vector3f hitVector;
+    Node arrowNode;
+    int ID;
 
-    public Planet(Material mat, GameClient main) {
+    public Planet(Material mat, GameClient main,int ID) {
+        this.ID = ID;
         this.mat = mat;
         this.sa = main;
         initPlanet();
@@ -49,9 +53,11 @@ public class Planet extends Node {
     }
 
     private void initPlanet() {
+        arrowNode = new Node();
+        attachChild(arrowNode);
         Sphere largeSphere = new Sphere(64, 64, 2);
         largeSphere.setTextureMode(Sphere.TextureMode.Projected);
-        geom = new Geometry("Ball", largeSphere);
+        geom = new Geometry("Ball "+String.valueOf(ID), largeSphere);
         geom.setMaterial(mat);
         attachChild(geom);
     }

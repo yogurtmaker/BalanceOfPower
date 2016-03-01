@@ -56,7 +56,7 @@ public class GameServer implements ServerNetworkListener {
         }
         // send entire playfield to new client
         NewClientMessage iniCM = new NewClientMessage(connectionID, playfield.data);
-        i++;
+         i++;
         return (iniCM);
     }
 }
