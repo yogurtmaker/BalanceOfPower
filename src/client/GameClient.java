@@ -41,6 +41,7 @@ public class GameClient extends SimpleApplication implements ClientNetworkListen
     //
 
     private int ID = -1;
+    private int targetID = -1;
     private final int planetRad = 2;
     protected ClientNetworkHandler networkHandler;
     private ClientPlayfield playfield;
@@ -169,7 +170,7 @@ public class GameClient extends SimpleApplication implements ClientNetworkListen
         fda = msg.field.getLast();
         planets = new Planet[5];
         for (FieldData fd : msg.field) {
-            planets[i] = new Planet(mats[i], this,i);
+            planets[i] = new Planet(mats[i],i);
             planets[i].geom.setLocalTranslation(fd.x, fd.y, fd.z);
             getRootNode().attachChild(planets[i]);
             i++;
@@ -194,16 +195,24 @@ public class GameClient extends SimpleApplication implements ClientNetworkListen
 
     // key action
     public void onAction(String name, boolean isPressed, float tpf) {
-
-        if (name.equals("absorb")) {
-            planets[0].absorb(planets[1]);
-        } else if (name.equals("attack") && isPressed) {
-            planets[0].attack(planets[1]);
-        } else if (name.equals("infusion")) {
-            planets[0].infusion(planets[1]);
-        } else if (name.equals("donation") && isPressed) {
-            planets[0].donation(planets[1]);
+        if (targetID != -1) {
+            MessageTypes type = null;
+            if (name.equals("absorb")) {
+                type = MessageTypes.absord;
+            } else if (name.equals("attack")&& isPressed) {
+                type = MessageTypes.attack;
+            } else if (name.equals("infusion")) {
+                type = MessageTypes.infusion;
+            } else if (name.equals("donation")&& isPressed) {
+                type = MessageTypes.donation;
+            }
+            if (type != null) {
+                ClientUpdateMessage atMsg = new ClientUpdateMessage(ID, targetID, type);
+                networkHandler.send(atMsg);
+            }
         }
+
+        
         if ("Click".equals(name) && isPressed) {
             boolean sendMessage = false;
             CollisionResults results = new CollisionResults();
@@ -216,15 +225,17 @@ public class GameClient extends SimpleApplication implements ClientNetworkListen
                         String target = results.getClosestCollision().getGeometry().getName();
                         if (target.startsWith("Ball")) {
                            int tempID = Integer.valueOf(target.split(" ")[1]);
-                            if (tempID!=ID) {                             
+                            if (tempID!=ID) { 
+                                targetID = tempID;
                                 ClientUpdateMessage atMsg = new ClientUpdateMessage(ID, tempID, MessageTypes.attachArrow);
                                 networkHandler.send(atMsg); 
                                 sendMessage = true;
                             }
                         }
                     }
-                    if(!sendMessage){
+                    if(!sendMessage &&  ID!=-1){
                         //  mats[ID].setColor("GlowColor", ColorRGBA.Black);
+                        targetID = -1;
                         ClientUpdateMessage deMsg = new ClientUpdateMessage(ID, -1, MessageTypes.detachArrow);
                         networkHandler.send(deMsg);
                     }
@@ -273,7 +284,7 @@ public class GameClient extends SimpleApplication implements ClientNetworkListen
             if (this.ID == -1) {
                 initGame(ncm);
             } else {
-                planets[i] = new Planet(mats[i], this,ncm.ID);
+                planets[i] = new Planet(mats[i],ncm.ID);
                 FieldData tempfd = ncm.field.getLast();
                 planets[i].geom.setLocalTranslation(tempfd.x, tempfd.y, tempfd.z);            
                 getRootNode().attachChild(planets[i]);

@@ -5,24 +5,14 @@
 package client;
 
 import com.jme3.app.SimpleApplication;
-import com.jme3.collision.CollisionResults;
-import com.jme3.input.MouseInput;
 import com.jme3.input.controls.ActionListener;
-import com.jme3.input.controls.MouseButtonTrigger;
 import com.jme3.material.Material;
-import com.jme3.math.ColorRGBA;
-import com.jme3.math.FastMath;
-import com.jme3.math.Quaternion;
-import com.jme3.math.Ray;
-import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.RenderManager;
 import com.jme3.renderer.ViewPort;
-import com.jme3.scene.AssetLinkNode;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.control.AbstractControl;
-import com.jme3.scene.debug.Arrow;
 import com.jme3.scene.shape.Sphere;
 
 public class Planet extends Node {
@@ -33,7 +23,6 @@ public class Planet extends Node {
     final int free = 0, absorb = 1, infusion = 2, operated = 3, death = 4;
     double energy = 100, tempTime = 0;
     int state = 0;
-    GameClient main;
     SimpleApplication sa;
     Material mat, arrmat;
     Geometry geom, arrow;
@@ -43,10 +32,9 @@ public class Planet extends Node {
     Node arrowNode;
     int ID;
 
-    public Planet(Material mat, GameClient main,int ID) {
+    public Planet(Material mat,int ID) {
         this.ID = ID;
         this.mat = mat;
-        this.sa = main;
         initPlanet();
         PlanetControl pControl = new PlanetControl();
         addControl(pControl);
