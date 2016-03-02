@@ -26,13 +26,12 @@ public class PlayField {
     public PlayField() {
         data = new LinkedList<FieldData>();
         plantetPosition = new ArrayList();
-         plantetPosition.add(new Vector3f(-1, -5, 8));
+        plantetPosition.add(new Vector3f(-1, -5, 8));
         plantetPosition.add(new Vector3f(19, 10, 10));
         plantetPosition.add(new Vector3f(-8, 5, 3));
         plantetPosition.add(new Vector3f(10, -3, 15));
         plantetPosition.add(new Vector3f(6, 16, 3));
-       
-      
+
     }
 
     // -------------------------------------------------------------------------
@@ -46,8 +45,8 @@ public class PlayField {
         float b = rand.nextFloat();
         ColorRGBA c = new ColorRGBA(r, g, b, 1.0f);
         Vector3f pos = plantetPosition.get(id);
-       // FieldData newData = new FieldData(id, x, y, z, c);
-         FieldData newData = new FieldData(id, pos.x, pos.y, pos.z, c);
+        // FieldData newData = new FieldData(id, x, y, z, c);
+        FieldData newData = new FieldData(id, pos.x, pos.y, pos.z, c);
         data.addLast(newData);
         //
         // here we could add a test for max. number of players reached.

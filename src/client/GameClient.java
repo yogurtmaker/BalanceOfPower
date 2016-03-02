@@ -55,7 +55,7 @@ public class GameClient extends SimpleApplication implements ClientNetworkListen
     Vector3f hitVector;
     Geometry arrow, arrow1;
       static ReentrantLock lock = new ReentrantLock();
-
+      
 
     // -------------------------------------------------------------------------
     public static void main(String[] args) {
@@ -171,7 +171,6 @@ public class GameClient extends SimpleApplication implements ClientNetworkListen
         for (FieldData fd : msg.field) {
             planets[i] = new Planet(mats[i], this,i);
             planets[i].geom.setLocalTranslation(fd.x, fd.y, fd.z);
-            System.out.println("pisition : "+fd.x+" , "+fd.y+" , "+ fd.z);
             getRootNode().attachChild(planets[i]);
             i++;
             fda = fd;
@@ -183,13 +182,6 @@ public class GameClient extends SimpleApplication implements ClientNetworkListen
     private void initKeys() {
         planets = new Planet[5];
 
-        /* for (int i = 0; i < 5; i++) {
-         planets[i] = new Planet(mats[i], );
-         planets[i].geom.setLocalTranslation(-10 + 5 * i, 5f, 0f);
-         //rootNode.attachChild(planets[i]);
-         System.out.println("print: " + i);
-         }
-         */
         inputManager.addMapping("absorb", new KeyTrigger(KeyInput.KEY_I));
         inputManager.addMapping("attack", new KeyTrigger(KeyInput.KEY_K));
         inputManager.addMapping("infusion", new KeyTrigger(KeyInput.KEY_J));
@@ -261,19 +253,21 @@ public class GameClient extends SimpleApplication implements ClientNetworkListen
     }
     // -------------------------------------------------------------------------
     // message received
-//    public   void messageReceived(Message msg){
-//        
-//    this.enqueue(new Callable(){
-//        public Object call() throws Exception {
-//        
-//         return null;
-//   
-//        }
-//    });
-//    }
+    public   void messageReceived(Message msg){
+       final GameClient app;
+        app = this;
+        final Message message = msg;
+    app.enqueue(new Callable(){
+        public Object call() throws Exception {
+       app.ClientUpdate(message);
+         return null;
+   
+        }
+    });
+    }
    
     
-    public   void messageReceived(Message msg){
+    public   void ClientUpdate(Message msg){
             if (msg instanceof NewClientMessage) {
             NewClientMessage ncm = (NewClientMessage) msg;
             if (this.ID == -1) {
