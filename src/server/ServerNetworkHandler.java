@@ -8,13 +8,18 @@ import com.jme3.network.MessageListener;
 import com.jme3.network.Network;
 import com.jme3.network.Server;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import messages.*;
 
 
-public class ServerNetworkHandler implements MessageListener, ConnectionListener {
+public class ServerNetworkHandler extends TimerTask implements MessageListener, ConnectionListener {
 
     public static int SERVERPORT = 6143;
     static ReentrantLock lock = new ReentrantLock();
@@ -23,7 +28,9 @@ public class ServerNetworkHandler implements MessageListener, ConnectionListener
 
     // -------------------------------------------------------------------------
     public ServerNetworkHandler(GameServer l) {
-        gameServer = l;
+        gameServer = l;         
+           Timer timer = new Timer();
+           timer.schedule(this, 1000, 1000);
         try {
             server = Network.createServer(SERVERPORT);
             Registration.registerMessages();
@@ -38,18 +45,18 @@ public class ServerNetworkHandler implements MessageListener, ConnectionListener
     // -------------------------------------------------------------------------
     public void messageReceived(Object source, Message msg) {
         //System.out.println("Received: " + (StringData)msg);
-        //gameServer.messageReceived(msg);
-        //broadcast(msg);
-        lock.lock();
-        /*if (msg instanceof VecPos) {
-            System.out.println("Received message from vector");
-            broadcast(msg);
-        }
-        if (msg instanceof Detach) {
-            broadcast(msg);
-        }*/
-        broadcast(msg);
-        lock.unlock();
+        gameServer.messageReceived(msg);
+        broadcast(msg);       
+    }
+   
+    //timertask method which used for update the energy list
+    @Override
+    public void run() {
+         List<Double> energyList = gameServer.getEnergyList();
+      EnergyMessage eMsg = new EnergyMessage(energyList);
+      if(energyList.size()>0){   
+        System.out.println("energy:"+energyList.toString());
+      }
     }
 
     // -------------------------------------------------------------------------
@@ -90,4 +97,6 @@ public class ServerNetworkHandler implements MessageListener, ConnectionListener
     public void connectionRemoved(Server server, HostedConnection conn) {
         // TODO
     }
+
+  
 }

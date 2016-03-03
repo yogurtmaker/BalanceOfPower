@@ -10,11 +10,10 @@ package messages;
  */
 
 public enum MessageTypes {
-    addPlanet,
     attachArrow,
     detachArrow,
-absord,
-attack,
-infusion,
-donation;   
+    absord,
+    attack,
+    infusion,
+    donation;
 }

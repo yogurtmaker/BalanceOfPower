@@ -21,7 +21,7 @@ public class Planet extends Node {
     float totaltime = 0;
     // free mean no action, operated mean planet being attacked or infusion, death mean no energy
     final int free = 0, absorb = 1, infusion = 2, operated = 3, death = 4;
-    double energy = 100, tempTime = 0;
+   private double energy = 100, tempTime = 0;
     int state = 0;
     SimpleApplication sa;
     Material mat, arrmat;
@@ -53,7 +53,9 @@ public class Planet extends Node {
      public synchronized void setEnergy(double amount) {
         energy = amount;
     }
-
+     public double getEnergy() {
+      return energy;
+    }
     public synchronized double addToEnergy(double amount) {
         energy += amount;
         return energy;
@@ -67,6 +69,7 @@ public class Planet extends Node {
 
     // final int free=0,absorb = 1,infusion = 2,operated=3; 
     public boolean absorb(Planet planet) {
+ 
         if (state == free && planet.state != death) {
             setState(absorb);
             this.planet = planet;
@@ -80,7 +83,7 @@ public class Planet extends Node {
 
     //attack will both decEnergy, attacked planet may death
     public boolean attack(Planet planet) {
-        if (state == free) {
+        if (state == free&& planet.state != death) {
             setState(operated);
             double temp;
             temp = energy * .5;
@@ -119,7 +122,7 @@ public class Planet extends Node {
 
     //donation don't need to check if any of them death
     public boolean donation(Planet planet) {
-        if (state == free) {
+        if (state == free&& planet.state != death) {
             setState(operated);
             double temp = 0;
             temp = energy * .5f;
