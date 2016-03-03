@@ -299,36 +299,48 @@ public class GameClient extends SimpleApplication implements ClientNetworkListen
             MessageTypes messageTypes = message.messageTypes;
             System.out.println("Client received: " + message.messageTypes.name()
                     + " SourceId:" + message.sourceId + " TargetId:" + message.targetId);
-            if (messageTypes.equals(MessageTypes.attachArrow)) {
-                Vector3f tVector = planets[message.targetId].geom.getWorldTranslation();
-                Vector3f sVector = planets[message.sourceId].geom.getWorldTranslation();
-                Vector3f dirVector = tVector.subtract(sVector);
-                Arrow line = new Arrow(dirVector.subtract(dirVector.normalize().mult(1.2f)));
-                line.setLineWidth(4);
-                arrow1 = new Geometry("Arrow", line);
-                arrmat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-                arrmat.setColor("Color", ColorRGBA.Gray);
-                arrow1.setMaterial(arrmat);
-                arrow1.setLocalTranslation(sVector);
+            if (messageTypes.equals(MessageTypes.detachArrow)) {
                 planets[message.sourceId].arrowNode.detachAllChildren();
-                planets[message.sourceId].arrowNode.attachChild(arrow1);
-            } else if (messageTypes.equals(MessageTypes.detachArrow)) {
-                planets[message.sourceId].arrowNode.detachAllChildren();
-            }       
-        }
-        else if (msg instanceof EnergyMessage) {
+            }
+           else {
+                 ColorRGBA arrowColor = ColorRGBA.Gray;
+                 if (messageTypes.equals(MessageTypes.absord) &&message.isPressed) {
+                     arrowColor = ColorRGBA.Red;
+                 }
+                 if (messageTypes.equals(MessageTypes.infusion) &&message.isPressed) {
+                     arrowColor = ColorRGBA.Green;
+                 }
+
+                 Vector3f tVector = planets[message.targetId].geom.getWorldTranslation();
+                 Vector3f sVector = planets[message.sourceId].geom.getWorldTranslation();
+                 Vector3f dirVector = tVector.subtract(sVector);
+                 Arrow line = new Arrow(dirVector.subtract(dirVector.normalize().mult(1.2f)));
+                 line.setLineWidth(4);
+                 arrow1 = new Geometry("Arrow", line);
+                 arrmat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+                 arrmat.setColor("Color", arrowColor);
+                 arrow1.setMaterial(arrmat);
+                 arrow1.setLocalTranslation(sVector);
+                 planets[message.sourceId].arrowNode.detachAllChildren();
+                 planets[message.sourceId].arrowNode.attachChild(arrow1);
+             }
+
+
+
+            
+        } else if (msg instanceof EnergyMessage) {
             EnergyMessage eMsg = (EnergyMessage) msg;
             int n = 0;
-             System.out.println("energy: ");
+            System.out.println("energy: ");
             for (Double energy : eMsg.energyList) {
                 planets[n].setEnergy(energy);
-                    float a = (float)(energy/100+.5);
-                    mats[n].setColor("Color", new ColorRGBA(a,a,a,1));
-                    planets[n].geom.setMaterial(mats[n]);
-                System.out.print( planets[n].getEnergy()+", ");
+                float a = (float) (energy / 100 + .5);
+                mats[n].setColor("Color", new ColorRGBA(a, a, a, 1));
+                planets[n].geom.setMaterial(mats[n]);
+                System.out.print(planets[n].getEnergy() + ", ");
                 n++;
             }
-             System.out.println("");
+            System.out.println("");
         }
             
             
