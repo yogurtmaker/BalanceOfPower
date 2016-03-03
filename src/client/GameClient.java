@@ -207,7 +207,7 @@ public class GameClient extends SimpleApplication implements ClientNetworkListen
                 type = MessageTypes.donation;
             }
             if (type != null) {
-                ClientUpdateMessage atMsg = new ClientUpdateMessage(ID, targetID, type);
+                ClientUpdateMessage atMsg = new ClientUpdateMessage(ID, targetID, type, isPressed);
                 networkHandler.send(atMsg);
             }
         }
@@ -227,7 +227,7 @@ public class GameClient extends SimpleApplication implements ClientNetworkListen
                            int tempID = Integer.valueOf(target.split(" ")[1]);
                             if (tempID!=ID) { 
                                 targetID = tempID;
-                                ClientUpdateMessage atMsg = new ClientUpdateMessage(ID, tempID, MessageTypes.attachArrow);
+                                ClientUpdateMessage atMsg = new ClientUpdateMessage(ID, tempID, MessageTypes.attachArrow,isPressed);
                                 networkHandler.send(atMsg); 
                                 sendMessage = true;
                             }
@@ -236,7 +236,7 @@ public class GameClient extends SimpleApplication implements ClientNetworkListen
                     if(!sendMessage &&  ID!=-1){
                         //  mats[ID].setColor("GlowColor", ColorRGBA.Black);
                         targetID = -1;
-                        ClientUpdateMessage deMsg = new ClientUpdateMessage(ID, -1, MessageTypes.detachArrow);
+                        ClientUpdateMessage deMsg = new ClientUpdateMessage(ID, -1, MessageTypes.detachArrow, isPressed);
                         networkHandler.send(deMsg);
                     }
 //                }
@@ -249,18 +249,19 @@ public class GameClient extends SimpleApplication implements ClientNetworkListen
         mats = new Material[6];
         mats[0] = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
         mats[0].setTexture("ColorMap", assetManager.loadTexture("Textures/Earth.jpg"));
-
+        mats[0].setColor("Color", ColorRGBA.White);
         mats[1] = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
         mats[1].setTexture("ColorMap", assetManager.loadTexture("Textures/Arnessk.png"));
-
+        mats[1].setColor("Color", ColorRGBA.White);
         mats[2] = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
         mats[2].setTexture("ColorMap", assetManager.loadTexture("Textures/Klendathu.png"));
-
+        mats[2].setColor("Color", ColorRGBA.White);
         mats[3] = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
         mats[3].setTexture("ColorMap", assetManager.loadTexture("Textures/Reststop.png"));
-
+        mats[3].setColor("Color", ColorRGBA.White);
         mats[4] = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
         mats[4].setTexture("ColorMap", assetManager.loadTexture("Textures/Thunorrad.jpg"));
+        mats[4].setColor("Color", ColorRGBA.White);
     }
     // -------------------------------------------------------------------------
     // message received
@@ -318,12 +319,16 @@ public class GameClient extends SimpleApplication implements ClientNetworkListen
         else if (msg instanceof EnergyMessage) {
             EnergyMessage eMsg = (EnergyMessage) msg;
             int n = 0;
-             System.out.println("\nenergy: ");
+             System.out.println("energy: ");
             for (Double energy : eMsg.energyList) {
                 planets[n].setEnergy(energy);
+                    float a = (float)(energy/100+.5);
+                    mats[n].setColor("Color", new ColorRGBA(a,a,a,1));
+                    planets[n].geom.setMaterial(mats[n]);
                 System.out.print( planets[n].getEnergy()+", ");
                 n++;
             }
+             System.out.println("");
         }
             
             
