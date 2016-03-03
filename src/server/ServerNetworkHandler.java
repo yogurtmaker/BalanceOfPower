@@ -45,8 +45,11 @@ public class ServerNetworkHandler extends TimerTask implements MessageListener, 
     // -------------------------------------------------------------------------
     public void messageReceived(Object source, Message msg) {
         //System.out.println("Received: " + (StringData)msg);
-        gameServer.messageReceived(msg);
-        broadcast(msg);       
+        List<Double> energyList= gameServer.messageReceived(msg);
+        EnergyMessage eMsg = new EnergyMessage(energyList);
+        broadcast(msg);   
+         broadcast(eMsg);   
+        
     }
    
     //timertask method which used for update the energy list
@@ -55,7 +58,8 @@ public class ServerNetworkHandler extends TimerTask implements MessageListener, 
          List<Double> energyList = gameServer.getEnergyList();
       EnergyMessage eMsg = new EnergyMessage(energyList);
       if(energyList.size()>0){   
-        System.out.println("energy:"+energyList.toString());
+       // System.out.println("energy:"+energyList.toString());
+         broadcast(eMsg); 
       }
     }
 

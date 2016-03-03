@@ -10,13 +10,13 @@ import java.util.List;
 
 @Serializable
 public class EnergyMessage  extends AbstractMessage {
-    public List energyList;
+    public List<Double> energyList;
     
      public EnergyMessage(){
      }
      
      
-    public EnergyMessage(List energyList){
+    public EnergyMessage(List<Double> energyList){
     this.energyList = energyList;
     }
 }

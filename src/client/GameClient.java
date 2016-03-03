@@ -279,43 +279,54 @@ public class GameClient extends SimpleApplication implements ClientNetworkListen
    
     
     public   void ClientUpdate(Message msg){
-            if (msg instanceof NewClientMessage) {
+         if (msg instanceof NewClientMessage) {
             NewClientMessage ncm = (NewClientMessage) msg;
             if (this.ID == -1) {
                 initGame(ncm);
             } else {
-                planets[i] = new Planet(mats[i],ncm.ID);
+                planets[i] = new Planet(mats[i], ncm.ID);
                 FieldData tempfd = ncm.field.getLast();
-                planets[i].geom.setLocalTranslation(tempfd.x, tempfd.y, tempfd.z);            
+                planets[i].geom.setLocalTranslation(tempfd.x, tempfd.y, tempfd.z);
                 getRootNode().attachChild(planets[i]);
                 inPlayfield.addSphere(tempfd);
                 i++;
                 //inPlayfield.addSphere(ncm.field.getLast());
             }
         }
-      else  if (msg instanceof ClientUpdateMessage) {
+        else if (msg instanceof ClientUpdateMessage) {
             ClientUpdateMessage message = (ClientUpdateMessage) msg;
-            MessageTypes messageTypes = message.messageTypes; 
-           System.out.println("Client received: " + message.messageTypes.name()
-                    + " SourceId:"+message.sourceId +" TargetId:"+message.targetId );
-           if (messageTypes.equals(MessageTypes.attachArrow)) {
-             Vector3f tVector = planets[message.targetId].geom.getWorldTranslation();
-             Vector3f sVector = planets[message.sourceId].geom.getWorldTranslation();
-             Vector3f dirVector = tVector.subtract(sVector);
-            Arrow line = new Arrow(dirVector.subtract(dirVector.normalize().mult(1.2f)));
-            line.setLineWidth(4);
-            arrow1 = new Geometry("Arrow", line);
-            arrmat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-            arrmat.setColor("Color", ColorRGBA.Gray);
-            arrow1.setMaterial(arrmat);
-            arrow1.setLocalTranslation(sVector);        
-             planets[message.sourceId].arrowNode.detachAllChildren();
-            planets[message.sourceId].arrowNode.attachChild(arrow1);        
+            MessageTypes messageTypes = message.messageTypes;
+            System.out.println("Client received: " + message.messageTypes.name()
+                    + " SourceId:" + message.sourceId + " TargetId:" + message.targetId);
+            if (messageTypes.equals(MessageTypes.attachArrow)) {
+                Vector3f tVector = planets[message.targetId].geom.getWorldTranslation();
+                Vector3f sVector = planets[message.sourceId].geom.getWorldTranslation();
+                Vector3f dirVector = tVector.subtract(sVector);
+                Arrow line = new Arrow(dirVector.subtract(dirVector.normalize().mult(1.2f)));
+                line.setLineWidth(4);
+                arrow1 = new Geometry("Arrow", line);
+                arrmat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+                arrmat.setColor("Color", ColorRGBA.Gray);
+                arrow1.setMaterial(arrmat);
+                arrow1.setLocalTranslation(sVector);
+                planets[message.sourceId].arrowNode.detachAllChildren();
+                planets[message.sourceId].arrowNode.attachChild(arrow1);
+            } else if (messageTypes.equals(MessageTypes.detachArrow)) {
+                planets[message.sourceId].arrowNode.detachAllChildren();
+            }       
         }
-       else if (messageTypes.equals(MessageTypes.detachArrow)) {
-            planets[message.sourceId].arrowNode.detachAllChildren();
+        else if (msg instanceof EnergyMessage) {
+            EnergyMessage eMsg = (EnergyMessage) msg;
+            int n = 0;
+             System.out.println("\nenergy: ");
+            for (Double energy : eMsg.energyList) {
+                planets[n].setEnergy(energy);
+                System.out.print( planets[n].getEnergy()+", ");
+                n++;
+            }
         }
-    
-    }
+            
+            
+            
     }
 }
