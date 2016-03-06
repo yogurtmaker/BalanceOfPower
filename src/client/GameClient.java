@@ -340,7 +340,6 @@ public class GameClient extends SimpleApplication implements ClientNetworkListen
                     k = j;
                 }
             }
-            System.out.println(count);
             if (count == 4) {
                 tGameOver = true;
                 if (k == ID) {
