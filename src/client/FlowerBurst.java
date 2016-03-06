@@ -45,20 +45,17 @@ public class FlowerBurst extends AbstractControl {
     }
 
     private void init() {
-        emitter = new ParticleEmitter("Debris", ParticleMesh.Type.Triangle, 250);
+        emitter = new ParticleEmitter("Debris", ParticleMesh.Type.Triangle, 3);
         Material debris_mat = new Material(sa.getAssetManager(), "Common/MatDefs/Misc/Particle.j3md");
         debris_mat.setTexture("Texture", sa.getAssetManager().loadTexture("Textures/flower.jpg"));
         emitter.setMaterial(debris_mat);
-        emitter.setImagesX(3);
-        emitter.setImagesY(3); // 3x3 texture animation
         emitter.setRotateSpeed(40);
-        emitter.setSelectRandomImage(true);
         emitter.setStartColor(ColorRGBA.Green);
         emitter.setEndColor(ColorRGBA.Black);
         emitter.setGravity(0, 0, 0);
         emitter.getParticleInfluencer().setVelocityVariation(1.0f);
         emitter.getParticleInfluencer().setInitialVelocity(new Vector3f(0, 4, 0));
-        emitter.setStartSize(0.3f);
+        emitter.setStartSize(3f);
         emitter.setEndSize(0.005f);
         emitter.setLowLife(0.5f);
         emitter.setHighLife(MAXLIFETIME);

@@ -58,7 +58,7 @@ public class SingleBurstParticleEmitter extends AbstractControl{
         emitter.setGravity(0,0, 0);
         emitter.getParticleInfluencer().setVelocityVariation(1.0f);
         emitter.getParticleInfluencer().setInitialVelocity(new Vector3f(0, 4, 0));
-        emitter.setStartSize(0.3f);
+        emitter.setStartSize(1f);
         emitter.setEndSize(0.005f);
         emitter.setLowLife(0.5f);
         emitter.setHighLife(MAXLIFETIME);

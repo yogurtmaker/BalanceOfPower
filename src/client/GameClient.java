@@ -57,7 +57,7 @@ public class GameClient extends SimpleApplication implements ClientNetworkListen
     Material mats[], arrmat;
     Planet[] planets;
     GameClient main;
-    BitmapText text, text1, text2, text3, text4, texts[], texts1[];
+    BitmapText text, text1, text2, text3, text4, text5, text6, text7, texts[], texts1[];
     AppStateManager asm;
     int i = 0;
     Vector3f hitVector, ps[], ps1[];
@@ -66,7 +66,8 @@ public class GameClient extends SimpleApplication implements ClientNetworkListen
     Date date;
     DateFormat format;
     String passTime, time1;
-    boolean ft, gf = false;
+    int count = 0;
+    boolean ft, gf = false, gameOver = false, tGameOver = false;
 
     // -------------------------------------------------------------------------
     public static void main(String[] args) {
@@ -224,21 +225,19 @@ public class GameClient extends SimpleApplication implements ClientNetworkListen
 
     // key action
     public void onAction(String name, boolean isPressed, float tpf) {
-        if (i > 4) {
+        if (i > 4 && !gameOver && !tGameOver) {
             if (targetID != -1) {
                 MessageTypes type = null;
                 if (name.equals("absorb")) {
                     type = MessageTypes.absorb;
                 } else if (name.equals("attack") && isPressed) {
                     type = MessageTypes.attack;
-                    new SingleBurstParticleEmitter(this, rootNode, planets[targetID].geom.getWorldTranslation());
                     time1 = getTime();
                     ft = true;
                 } else if (name.equals("infusion")) {
                     type = MessageTypes.infusion;
                 } else if (name.equals("donation") && isPressed) {
                     type = MessageTypes.donation;
-                    new FlowerBurst(this, rootNode, planets[targetID].geom.getWorldTranslation());
                     time1 = getTime();
                     ft = true;
                 }
@@ -316,6 +315,41 @@ public class GameClient extends SimpleApplication implements ClientNetworkListen
     }
 
     public void ClientUpdate(Message msg) {
+        AppSettings s = getAppSettings();
+        if (ID != -1) {
+            if (planets[ID].getEnergy() <= 0.09) {
+                gameOver = true;
+                float lineY = s.getHeight() / 2;
+                float lineX = (s.getWidth() - text5.getLineWidth()) / 2;
+                text5.setLocalTranslation(lineX, lineY, 0);
+            }
+            if (gameOver) {
+                if (planets[ID].getEnergy() >= 0.09) {
+                    text5.setLocalTranslation(0, 0, 0);
+                    gameOver = false;
+                }
+            }
+        }
+        if (i > 4) {
+            int k = 0;
+            count = 0;
+            for (int j = 0; j < 5; j++) {
+                if (planets[j].getEnergy() <= 0.09) {
+                    count++;
+                } else {
+                    k = j;
+                }
+            }
+            System.out.println(count);
+            if (count == 4) {
+                tGameOver = true;
+                if (k == ID) {
+                    float lineY = s.getHeight() / 2;
+                    float lineX = (s.getWidth() - text6.getLineWidth()) / 2;
+                    text6.setLocalTranslation(lineX, lineY, 0);
+                }
+            }
+        }
         if (ft) {
             long time = getPassTime(getTime(), time1);
             if (time >= 1) {
@@ -325,13 +359,12 @@ public class GameClient extends SimpleApplication implements ClientNetworkListen
             }
         }
         if (msg instanceof GameFull && i < 2) {
-            getGuiNode().attachChild(text);
-            AppSettings s = getAppSettings();
             gf = true;
             text.setLocalTranslation(0, 0, 0);
             text1.setLocalTranslation(0, 0, 0);
             text2.setLocalTranslation(0, 0, 0);
             text3.setLocalTranslation(0, 0, 0);
+            text7.setLocalTranslation(0, 0, 0);
             float lineY = s.getHeight() / 2;
             float lineX = (s.getWidth() - text4.getLineWidth()) / 2;
             text4.setLocalTranslation(lineX, lineY, 0f);
@@ -375,8 +408,10 @@ public class GameClient extends SimpleApplication implements ClientNetworkListen
                 }
                 if (messageTypes.equals(MessageTypes.attack)) {
                     arrowColor = ColorRGBA.Red;
+                    new SingleBurstParticleEmitter(this, rootNode, planets[message.targetId].geom.getWorldTranslation());
                 }
                 if (messageTypes.equals(MessageTypes.donation)) {
+                    new FlowerBurst(this, rootNode, planets[message.targetId].geom.getWorldTranslation());
                     arrowColor = ColorRGBA.Green;
                 }
 
@@ -461,6 +496,15 @@ public class GameClient extends SimpleApplication implements ClientNetworkListen
         lineX = (s.getWidth() - text2.getLineWidth()) / 2 - 380;
         text2.setLocalTranslation(lineX, lineY, 0f);
 
+        text7 = new BitmapText(bmf);
+        text7.setSize(bmf.getCharSet().getRenderedSize() * 2);
+        text7.setColor(ColorRGBA.Green);
+        text7.setText("Try to destroy others and win the game!");
+        getGuiNode().attachChild(text7);
+        lineY = s.getHeight() / 2 + 250;
+        lineX = (s.getWidth() - text7.getLineWidth()) / 2 - 440;
+        text7.setLocalTranslation(lineX, lineY, 0f);
+
         text3 = new BitmapText(bmf);
         text3.setSize(bmf.getCharSet().getRenderedSize() * 2);
         text3.setColor(ColorRGBA.Red);
@@ -475,6 +519,18 @@ public class GameClient extends SimpleApplication implements ClientNetworkListen
         text4.setColor(ColorRGBA.Red);
         text4.setText("Sorry! Game is full!");
         getGuiNode().attachChild(text4);
+
+        text5 = new BitmapText(bmf);
+        text5.setSize(bmf.getCharSet().getRenderedSize() * 2);
+        text5.setColor(ColorRGBA.Red);
+        text5.setText("Game is over! You are dead! Wait for rescue from someone else or exit!");
+        getGuiNode().attachChild(text5);
+
+        text6 = new BitmapText(bmf);
+        text6.setSize(bmf.getCharSet().getRenderedSize() * 2);
+        text6.setColor(ColorRGBA.Red);
+        text6.setText("Congratulations! You are the winner!");
+        getGuiNode().attachChild(text6);
 
         texts = new BitmapText[5];
         texts1 = new BitmapText[5];
