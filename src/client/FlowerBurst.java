@@ -15,26 +15,26 @@ import com.jme3.scene.control.AbstractControl;
  *
  * @author Rolf
  */
-public class SingleBurstParticleEmitter extends AbstractControl{
+public class FlowerBurst extends AbstractControl {
+
     private static final float MAXLIFETIME = 2.0f;
     ParticleEmitter emitter;
     SimpleApplication sa;
     Node parent;
     private float time;
     Vector3f location;
-    
-    public SingleBurstParticleEmitter(SimpleApplication sa, Node parent, Vector3f location){
+
+    public FlowerBurst(SimpleApplication sa, Node parent, Vector3f location) {
         this.sa = sa;
         this.parent = parent;
         this.location = location;
         init();
     }
-    
-    
+
     @Override
     protected void controlUpdate(float tpf) {
-        time+=tpf;
-        if (time>MAXLIFETIME){
+        time += tpf;
+        if (time > MAXLIFETIME) {
             emitter.removeControl(this);
             parent.detachChild(emitter);
         }
@@ -42,20 +42,20 @@ public class SingleBurstParticleEmitter extends AbstractControl{
 
     @Override
     protected void controlRender(RenderManager rm, ViewPort vp) {
-    }  
-    
-    private void init(){
+    }
+
+    private void init() {
         emitter = new ParticleEmitter("Debris", ParticleMesh.Type.Triangle, 250);
         Material debris_mat = new Material(sa.getAssetManager(), "Common/MatDefs/Misc/Particle.j3md");
-        debris_mat.setTexture("Texture", sa.getAssetManager().loadTexture("Effects/Explosion/Debris.png"));
+        debris_mat.setTexture("Texture", sa.getAssetManager().loadTexture("Textures/flower.jpg"));
         emitter.setMaterial(debris_mat);
         emitter.setImagesX(3);
         emitter.setImagesY(3); // 3x3 texture animation
         emitter.setRotateSpeed(40);
         emitter.setSelectRandomImage(true);
-        emitter.setStartColor(ColorRGBA.Red);
+        emitter.setStartColor(ColorRGBA.Green);
         emitter.setEndColor(ColorRGBA.Black);
-        emitter.setGravity(0,0, 0);
+        emitter.setGravity(0, 0, 0);
         emitter.getParticleInfluencer().setVelocityVariation(1.0f);
         emitter.getParticleInfluencer().setInitialVelocity(new Vector3f(0, 4, 0));
         emitter.setStartSize(0.3f);
@@ -69,6 +69,3 @@ public class SingleBurstParticleEmitter extends AbstractControl{
         emitter.addControl(this);
     }
 }
-
-
-

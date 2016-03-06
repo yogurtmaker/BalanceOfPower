@@ -12,7 +12,7 @@ package messages;
 public enum MessageTypes {
     attachArrow,
     detachArrow,
-    absord,
+    absorb,
     attack,
     infusion,
     donation;

@@ -22,7 +22,7 @@ public class GameServer extends SimpleApplication implements ServerNetworkListen
     ServerNetworkHandler networkHandler;
     PlayField playfield;
     int i = 0;
-   public List<Planet> planetList;
+    public List<Planet> planetList;
 
     // -------------------------------------------------------------------------
     public static void main(String[] args) {
@@ -37,7 +37,7 @@ public class GameServer extends SimpleApplication implements ServerNetworkListen
         }
     }
 
-     @Override
+    @Override
     public void simpleInitApp() {
         planetList = new ArrayList<Planet>();
         networkHandler = new ServerNetworkHandler(this);
@@ -53,29 +53,29 @@ public class GameServer extends SimpleApplication implements ServerNetworkListen
     // Methods required by ServerNetworkHandler
     public List<Double> messageReceived(Message msg) {
         if (msg instanceof ClientUpdateMessage) {
-               List<Double> energyList = new ArrayList();
+            List<Double> energyList = new ArrayList();
             ClientUpdateMessage sd = (ClientUpdateMessage) msg;
             System.out.println("Sever received:" + sd.messageTypes.name()
-                    + " SourceId:"+sd.sourceId +" TargetId:"+sd.targetId );
-            if(sd.messageTypes.equals(MessageTypes.absord)){
-            planetList.get(sd.sourceId).absorb( planetList.get(sd.targetId));
-          }
-            if(sd.messageTypes.equals(MessageTypes.attack)){
-            planetList.get(sd.sourceId).attack( planetList.get(sd.targetId));
-          }
-            if(sd.messageTypes.equals(MessageTypes.donation)){
-            planetList.get(sd.sourceId).donation( planetList.get(sd.targetId));
-          }
-            if(sd.messageTypes.equals(MessageTypes.infusion)){
-            planetList.get(sd.sourceId).infusion( planetList.get(sd.targetId));
-          }
-     
-            for(Planet planet:planetList){
-            energyList.add(planet.getEnergy());
+                    + " SourceId:" + sd.sourceId + " TargetId:" + sd.targetId);
+            if (sd.messageTypes.equals(MessageTypes.absorb)) {
+                planetList.get(sd.sourceId).absorb(planetList.get(sd.targetId));
+            }
+            if (sd.messageTypes.equals(MessageTypes.attack)) {
+                planetList.get(sd.sourceId).attack(planetList.get(sd.targetId));
+            }
+            if (sd.messageTypes.equals(MessageTypes.donation)) {
+                planetList.get(sd.sourceId).donation(planetList.get(sd.targetId));
+            }
+            if (sd.messageTypes.equals(MessageTypes.infusion)) {
+                planetList.get(sd.sourceId).infusion(planetList.get(sd.targetId));
+            }
+
+            for (Planet planet : planetList) {
+                energyList.add(planet.getEnergy());
             }
             return energyList;
         }
-        
+
         return null;
     }
 
@@ -83,29 +83,28 @@ public class GameServer extends SimpleApplication implements ServerNetworkListen
     public synchronized Message newConnectionReceived(int connectionID) throws Exception {
         // put player on random playfield
         boolean ok = playfield.addElement(connectionID);
-        if (i >= 5)
+        if (i >= 5) {
             ok = false;
+        }
         if (!ok) {
             throw new Exception("Max number of players exceeded.");
         }
-        Material  mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+        Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
         mat.setTexture("ColorMap", assetManager.loadTexture("Textures/Earth.jpg"));
         Planet planet = new Planet(mat, connectionID);
         planetList.add(planet);
         rootNode.attachChild(planet);
         // send entire playfield to new client
         NewClientMessage iniCM = new NewClientMessage(connectionID, playfield.data);
-         i++;
+        i++;
         return (iniCM);
     }
 
     public List<Double> getEnergyList() {
-      List<Double> energyList = new ArrayList();
-        for(Planet planet: planetList){
-        energyList.add(planet.getEnergy());
+        List<Double> energyList = new ArrayList();
+        for (Planet planet : planetList) {
+            energyList.add(planet.getEnergy());
         }
-      return energyList;
+        return energyList;
     }
-
-   
 }

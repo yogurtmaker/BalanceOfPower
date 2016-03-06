@@ -14,11 +14,13 @@ public class Registration {
     // referred to in messages.
 
     public static void registerMessages() {
-      
+
         Serializer.registerClass(NewClientMessage.class);
         Serializer.registerClass(FieldData.class);
-       // Serializer.registerClass(MessageTypes.class);
-           Serializer.registerClass(ClientUpdateMessage.class);
-          Serializer.registerClass(EnergyMessage.class);
+        // Serializer.registerClass(MessageTypes.class);
+        Serializer.registerClass(ClientUpdateMessage.class);
+        Serializer.registerClass(EnergyMessage.class);
+        Serializer.registerClass(HitTime.class);
+        Serializer.registerClass(GameFull.class);
     }
 }

@@ -78,7 +78,10 @@ public class ServerNetworkHandler extends TimerTask implements MessageListener, 
             broadcast(m);
         } catch (Exception e) {
             // Connection not accepted.
+            GameFull gf = new GameFull();
+            broadcast(gf);
             System.out.println("Connection not accepted. Kicking out client. TODO!!!" + connID);
+            
         }
     }
 
